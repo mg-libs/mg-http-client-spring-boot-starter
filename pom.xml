@@ -199,8 +199,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <!-- Key fingerprint, set via -Dgpg.keyname=XXXX or in settings.xml -->
-                                    <keyname>${gpg.keyname}</keyname>
+                                    <keyname>3E25618550E27EE8</keyname>
                                     <passphraseServerId>gpg.passphrase</passphraseServerId>
                                 </configuration>
                             </execution>
