@@ -10,6 +10,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Map;
+
 /**
  * Default {@link MgHttpClient} implementation.
  *
@@ -50,8 +52,18 @@ class MgHttpClientImpl implements MgHttpClient {
     }
 
     @Override
+    public <T> T get(String path, Map<String, ?> params, Class<T> responseType) {
+        return restTemplate.getForObject(url(path, params), responseType);
+    }
+
+    @Override
     public <T> T get(String path, ParameterizedTypeReference<T> responseType) {
         return restTemplate.exchange(url(path), HttpMethod.GET, null, responseType).getBody();
+    }
+
+    @Override
+    public <T> T get(String path, Map<String, ?> params, ParameterizedTypeReference<T> responseType) {
+        return restTemplate.exchange(url(path, params), HttpMethod.GET, null, responseType).getBody();
     }
 
     @Override
@@ -67,5 +79,11 @@ class MgHttpClientImpl implements MgHttpClient {
 
     private String url(String path) {
         return UriComponentsBuilder.fromUriString(baseUrl).path(path).toUriString();
+    }
+
+    private String url(String path, Map<String, ?> params) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl).path(path);
+        params.forEach(builder::queryParam);
+        return builder.build().toUriString();
     }
 }

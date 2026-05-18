@@ -32,7 +32,7 @@ Add to your project:
 <dependency>
     <groupId>io.github.mg-libs</groupId>
     <artifactId>mg-http-client-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -122,18 +122,36 @@ public class InvoiceService {
 // Simple GET
 MyDto dto = client.get("/v1/resource", MyDto.class);
 
-// GET with generic/collection type
+// GET with query parameters (URL-encoded automatically)
+MyDto dto = client.get("/v1/resource", Map.of("id", 42, "lang", "fr"), MyDto.class);
+
+// GET with query parameters + generic/collection type
+List<MyDto> items = client.get("/v1/items", Map.of("page", 1, "size", 20),
+                               new ParameterizedTypeReference<>() {});
+
+// GET with generic/collection type (no params)
 List<MyDto> items = client.get("/v1/items", new ParameterizedTypeReference<>() {});
 
 // POST with body
 ResultDto result = client.post("/v1/items", body, ResultDto.class);
 
 // Full control: any method, custom headers
+// → utilisez exchange pour GET avec body, réponses binaires, headers personnalisés
 ResponseEntity<byte[]> resp = client.exchange(
     "/v1/file",
     HttpMethod.GET,
     new HttpEntity<>(headers),
     byte[].class
+);
+
+// GET avec body (non standard mais certaines APIs l'exigent)
+HttpHeaders headers = new HttpHeaders();
+headers.setContentType(MediaType.APPLICATION_JSON);
+ResponseEntity<MyDto> resp = client.exchange(
+    "/v1/search",
+    HttpMethod.GET,
+    new HttpEntity<>(searchBody, headers),
+    MyDto.class
 );
 ```
 
