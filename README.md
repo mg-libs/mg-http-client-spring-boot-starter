@@ -9,7 +9,7 @@ Configure any number of external APIs in `application.yml` and inject a ready-to
 ## Features
 
 - Automatic JWT token acquisition and refresh (configurable TTL)
-- Three built-in auth strategies: JSON POST, Basic GET, Form POST
+- Five built-in auth strategies: JSON POST, Basic GET, Form POST, OAuth2 Client Credentials, OAuth2 Password
 - Override the auth strategy per client via a Spring bean
 - Thread-safe token cache (`volatile` + double-check `synchronized`)
 - Extra token headers (e.g. `x-access-token`) propagated alongside `Authorization`
@@ -259,8 +259,10 @@ TokenManager.getToken()
                                 │
                                 ├── JsonPostAuthStrategy  (default)
                                 ├── BasicGetAuthStrategy
-                                └── FormPostAuthStrategy
-                                    (or your custom bean)
+                                ├── FormPostAuthStrategy
+                                ├── OAuth2ClientCredentialsAuthStrategy
+                                ├── OAuth2PasswordAuthStrategy
+                                └── (or your custom bean)
 ```
 
 Token refresh is **thread-safe**: `volatile` ensures cross-thread visibility, `synchronized` with double-check locking prevents concurrent refresh calls.

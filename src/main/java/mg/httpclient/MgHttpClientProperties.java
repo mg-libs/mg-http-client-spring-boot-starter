@@ -37,6 +37,12 @@ import java.util.Map;
  *       client-secret: ${KC_SECRET}
  *       auth-method: OAUTH2_CLIENT_CREDENTIALS
  *       token-field: access_token
+ *
+ *     maps-api:
+ *       base-url: https://maps.example.com
+ *       api-key: ${MAPS_API_KEY}
+ *       auth-method: API_KEY
+ *       api-key-header: X-Goog-Api-Key  # optional, default: X-API-Key
  * }</pre>
  */
 @Getter
@@ -96,6 +102,15 @@ public class MgHttpClientProperties {
          * }</pre>
          */
         private Map<String, String> requestHeaders = new LinkedHashMap<>();
+
+        /** API key value. Used by {@link AuthMethod#API_KEY} only. */
+        private String apiKey;
+
+        /**
+         * Header name used to transmit the API key on every request.
+         * Used by {@link AuthMethod#API_KEY} only. Default: {@code X-API-Key}.
+         */
+        private String apiKeyHeader = "X-API-Key";
     }
 
     public enum AuthMethod {
@@ -119,6 +134,27 @@ public class MgHttpClientProperties {
          * POST {@code grant_type=password&username=...&password=...&client_id=...&client_secret=...}
          * → response contains {@code tokenField}.
          */
-        OAUTH2_PASSWORD
+        OAUTH2_PASSWORD,
+
+        /**
+         * Static API key injected directly into every request via the configured header.
+         * No auth endpoint is called. Configure with {@code api-key} and optionally
+         * {@code api-key-header} (default: {@code X-API-Key}).
+         */
+        API_KEY,
+
+        /**
+         * Static API key sent as {@code Authorization: Bearer <key>} on every request.
+         * No auth endpoint is called. Configure with {@code api-key} only
+         * ({@code api-key-header} is ignored).
+         * <pre>{@code
+         * my-api:
+         *   base-url: https://api.example.com
+         *   api-key: ${MY_API_KEY}
+         *   auth-method: BEARER_API_KEY
+         *   token-expiration-delay: 31536000   # static key — no refresh needed
+         * }</pre>
+         */
+        BEARER_API_KEY
     }
 }

@@ -1,5 +1,6 @@
 package mg.httpclient;
 
+import mg.httpclient.MgHttpClientProperties.AuthMethod;
 import mg.httpclient.token.TokenManager;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -36,10 +37,14 @@ class MgHttpClientImpl implements MgHttpClient {
 
         this.restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(factory));
         this.restTemplate.getInterceptors().add((request, body, execution) -> {
-            String token = tokenManager.getToken();
-            request.getHeaders().setBearerAuth(token);
-            config.getAdditionalTokenHeaders()
-                  .forEach(header -> request.getHeaders().add(header, token));
+            String credential = tokenManager.getToken();
+            if (config.getAuthMethod() == AuthMethod.API_KEY) {
+                request.getHeaders().set(config.getApiKeyHeader(), credential);
+            } else {
+                request.getHeaders().setBearerAuth(credential);
+                config.getAdditionalTokenHeaders()
+                      .forEach(header -> request.getHeaders().add(header, credential));
+            }
             config.getRequestHeaders()
                   .forEach((key, value) -> request.getHeaders().add(key, value));
             return execution.execute(request, body);

@@ -314,6 +314,69 @@ class MgHttpClientAutoConfigurationTest {
     }
 
     // -------------------------------------------------------------------------
+    // API_KEY strategy
+    // -------------------------------------------------------------------------
+
+    @Test
+    void apiKey_injectsKeyInDefaultHeader_withoutCallingAuthEndpoint() throws Exception {
+        server.enqueue(apiResponse("{}"));
+
+        runner.withPropertyValues(
+                        "mg.clients.svc.base-url=" + baseUrl,
+                        "mg.clients.svc.api-key=my-secret-key",
+                        "mg.clients.svc.auth-method=API_KEY"
+                )
+                .run(ctx -> {
+                    ctx.getBean(MgHttpClientFactory.class).get("svc").get("/ping", String.class);
+
+                    // No auth endpoint called — only 1 request total
+                    assertThat(server.getRequestCount()).isEqualTo(1);
+                    RecordedRequest apiReq = server.takeRequest();
+                    assertThat(apiReq.getHeader("X-API-Key")).isEqualTo("my-secret-key");
+                    assertThat(apiReq.getHeader(HttpHeaders.AUTHORIZATION)).isNull();
+                });
+    }
+
+    @Test
+    void apiKey_usesCustomHeader_whenConfigured() throws Exception {
+        server.enqueue(apiResponse("{}"));
+
+        runner.withPropertyValues(
+                        "mg.clients.svc.base-url=" + baseUrl,
+                        "mg.clients.svc.api-key=my-secret-key",
+                        "mg.clients.svc.auth-method=API_KEY",
+                        "mg.clients.svc.api-key-header=X-Goog-Api-Key"
+                )
+                .run(ctx -> {
+                    ctx.getBean(MgHttpClientFactory.class).get("svc").get("/ping", String.class);
+
+                    RecordedRequest apiReq = server.takeRequest();
+                    assertThat(apiReq.getHeader("X-Goog-Api-Key")).isEqualTo("my-secret-key");
+                    assertThat(apiReq.getHeader("X-API-Key")).isNull();
+                });
+    }
+
+    @Test
+    void bearerApiKey_injectsKeyAsBearerToken_withoutCallingAuthEndpoint() throws Exception {
+        server.enqueue(apiResponse("{}"));
+
+        runner.withPropertyValues(
+                        "mg.clients.svc.base-url=" + baseUrl,
+                        "mg.clients.svc.api-key=my-secret-key",
+                        "mg.clients.svc.auth-method=BEARER_API_KEY"
+                )
+                .run(ctx -> {
+                    ctx.getBean(MgHttpClientFactory.class).get("svc").get("/ping", String.class);
+
+                    // No auth endpoint called — only 1 request total
+                    assertThat(server.getRequestCount()).isEqualTo(1);
+                    RecordedRequest apiReq = server.takeRequest();
+                    assertThat(apiReq.getHeader(HttpHeaders.AUTHORIZATION)).isEqualTo("Bearer my-secret-key");
+                    assertThat(apiReq.getHeader("X-API-Key")).isNull();
+                });
+    }
+
+    // -------------------------------------------------------------------------
     // Static request headers
     // -------------------------------------------------------------------------
 

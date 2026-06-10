@@ -46,7 +46,7 @@ public class TokenManager {
         // Double-check: another thread may have refreshed while we were waiting
         if (!isExpired()) return;
 
-        log.info("[mg-http-client] Refreshing JWT token for client '" + clientName + "'");
+        log.info("[mg-http-client] Refreshing auth credential for client '" + clientName + "'");
         token = authStrategy.retrieveToken(config);
         expirationDate = Instant.now().plusSeconds(config.getTokenExpirationDelay());
     }

@@ -1,5 +1,6 @@
 package mg.httpclient;
 
+import mg.httpclient.auth.ApiKeyAuthStrategy;
 import mg.httpclient.auth.AuthStrategy;
 import mg.httpclient.auth.BasicGetAuthStrategy;
 import mg.httpclient.auth.FormPostAuthStrategy;
@@ -83,6 +84,8 @@ public class MgHttpClientFactory {
             case FORM_POST                  -> new FormPostAuthStrategy();
             case OAUTH2_CLIENT_CREDENTIALS  -> new OAuth2ClientCredentialsAuthStrategy();
             case OAUTH2_PASSWORD            -> new OAuth2PasswordAuthStrategy();
+            case API_KEY                    -> new ApiKeyAuthStrategy();
+            case BEARER_API_KEY             -> new ApiKeyAuthStrategy();
         };
     }
 }
